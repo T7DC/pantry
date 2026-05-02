@@ -1,10 +1,9 @@
 import { addItem } from "./data/pantryStore.js";
-import { ocrReceiptImage } from "./ocr/receiptOcr.js";
-import { parseReceiptTextToItems } from "./ocr/parseReceipt.js";
+import { createWorker } from "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js";
 
-const btnScan = document.getElementById("btnScan");
-const btnClearScan = document.getElementById("btnClearScan");
 const ticketInput = document.getElementById("ticketInput");
+const btnClearScan = document.getElementById("btnClearScan");
+const btnImport = document.getElementById("btnImport");
 
 const scanStatus = document.getElementById("scanStatus");
 const progressBar = document.getElementById("progressBar");
@@ -17,112 +16,97 @@ const scanResults = document.getElementById("scanResults");
 const itemsPreviewList = document.getElementById("itemsPreviewList");
 const rawOcrText = document.getElementById("rawOcrText");
 
-const btnImport = document.getElementById("btnImport");
+const importMessage = document.getElementById("importMessage");
 
 let parsedItems = [];
-let lastOcrText = "";
 
-function setProgress(pct, label) {
-    progressBar.style.width = `${pct}%`;
-    progressText.textContent = label;
+function showMessage(type, text) {
+    importMessage.textContent = text;
+    importMessage.className = `import-message ${type}`;
+    importMessage.hidden = false;
+}
+
+function clearMessage() {
+    importMessage.hidden = true;
 }
 
 function resetScan() {
     parsedItems = [];
-    lastOcrText = "";
-    itemsPreviewList.innerHTML = "";
-    rawOcrText.textContent = "";
-    btnImport.disabled = true;
-
     scanStatus.hidden = true;
     scanPreview.hidden = true;
     scanResults.hidden = true;
-
+    btnImport.disabled = true;
     btnClearScan.disabled = true;
-    ticketInput.value = "";
+    clearMessage();
 }
-
-btnScan.addEventListener("click", () => {
-    ticketInput.click();
-});
 
 btnClearScan.addEventListener("click", resetScan);
 
 ticketInput.addEventListener("change", async (e) => {
-    const file = e.target.files?.[0];
+    resetScan();
+
+    const file = e.target.files[0];
     if (!file) return;
 
     btnClearScan.disabled = false;
 
-    // Preview image
-    const url = URL.createObjectURL(file);
-    ticketPreviewImg.src = url;
+    ticketPreviewImg.src = URL.createObjectURL(file);
     scanPreview.hidden = false;
 
-    // OCR progress UI
     scanStatus.hidden = false;
-    setProgress(1, "OCR gestart…");
+    progressText.textContent = "OCR bezig…";
+    progressBar.style.width = "10%";
 
-    // OCR
-    lastOcrText = await ocrReceiptImage(file, (m) => {
-        // m.status: 'recognizing text' etc.
-        const pct = Math.round((m.progress ?? 0) * 100);
-        setProgress(Math.max(2, pct), `${m.status ?? "OCR…"} (${pct}%)`);
-    });
+    try {
+        const worker = await createWorker("eng", 1, {
+            logger: m => {
+                if (m.progress) {
+                    progressBar.style.width = `${Math.round(m.progress * 100)}%`;
+                }
+            }
+        });
 
-    setProgress(100, "OCR klaar. Parsing…");
+        const result = await worker.recognize(file);
+        await worker.terminate();
 
-    rawOcrText.textContent = lastOcrText;
+        rawOcrText.textContent = result.data.text;
 
-    // Parse into items
-    parsedItems = parseReceiptTextToItems(lastOcrText);
+        parsedItems = result.data.text
+            .split("\n")
+            .filter(l => l.match(/\d+[,.]\d{2}/))
+            .map(l => ({
+                name: l.replace(/\d+[,.]\d{2}.*/, "").trim(),
+                quantity: 1,
+                unit: "stuk",
+                price: Number(l.match(/\d+[,.]\d{2}/)[0].replace(",", "."))
+            }));
 
-    // Render preview list
-    itemsPreviewList.innerHTML = "";
-    for (const it of parsedItems) {
-        const li = document.createElement("li");
-        li.innerHTML = `
-      <span class="name">${escapeHtml(it.name)}</span>
-      <span class="price">€ ${it.price.toFixed(2)}</span>
-    `;
-        itemsPreviewList.appendChild(li);
+        itemsPreviewList.innerHTML = "";
+        parsedItems.forEach(it => {
+            const li = document.createElement("li");
+            li.innerHTML = `<span>${it.name}</span><span class="price">€ ${it.price.toFixed(2)}</span>`;
+            itemsPreviewList.appendChild(li);
+        });
+
+        scanResults.hidden = false;
+        btnImport.disabled = parsedItems.length === 0;
+
+    } catch {
+        showMessage("error", "❌ Er liep iets mis bij het uitlezen van het kasticket.");
     }
-
-    scanResults.hidden = false;
-    btnImport.disabled = parsedItems.length === 0;
-
-    setProgress(100, parsedItems.length
-        ? `Klaar: ${parsedItems.length} item(s) gevonden.`
-        : `Geen items gevonden. Probeer een scherpere foto.`
-    );
 });
 
 btnImport.addEventListener("click", () => {
-    const today = new Date().toISOString().slice(0, 10);
-
-    for (const it of parsedItems) {
-        addItem({
-            name: it.name,
-            quantity: it.quantity,
-            unit: it.unit,
-            price: it.price,
-            purchaseDate: today,
-            category: "Kasticket"
-        });
+    if (parsedItems.length === 0) {
+        showMessage("error", "❌ Geen items om te importeren.");
+        return;
     }
 
-    btnImport.disabled = true;
-    setProgress(100, `Geïmporteerd: ${parsedItems.length} item(s) toegevoegd aan Pantry (local storage).`);
+    try {
+        parsedItems.forEach(it => addItem(it));
+        showMessage("success", `✅ Succes! ${parsedItems.length} item(s) toegevoegd.`);
+        btnImport.disabled = true;
+    } catch {
+        showMessage("error", "❌ Items konden niet worden opgeslagen.");
+    }
 });
-
-function escapeHtml(str) {
-    return str
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll("\"", "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-// init
-resetScan();

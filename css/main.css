@@ -1,20 +1,13 @@
-/* =========================
-   Variables
-========================= */
 :root {
     --blue: #1e6fd9;
     --teal: #1fb6aa;
     --anthracite: #1f2933;
     --muted: #6b7280;
     --bg: #f5f7fb;
-
     --radius: 14px;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* =========================
-   Reset / base
-========================= */
 *,
 *::before,
 *::after {
@@ -23,24 +16,21 @@
 
 body {
     margin: 0;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     background: var(--bg);
     color: var(--anthracite);
-    line-height: 1.6;
 }
 
 img {
-    max-width: 100%;
     display: block;
+    max-width: 100%;
 }
 
 .muted {
     color: var(--muted);
 }
 
-/* =========================
-   Header
-========================= */
+/* HEADER */
 .app-header {
     background: linear-gradient(135deg, var(--blue), var(--teal));
     color: white;
@@ -61,29 +51,13 @@ img {
     height: 72px;
 }
 
-.app-header h1 {
-    margin: 0;
-    font-size: 2rem;
-}
-
-.tagline {
-    margin: 0.25rem 0 0;
-    opacity: 0.85;
-    font-size: 0.95rem;
-}
-
-/* =========================
-   Layout
-========================= */
+/* LAYOUT */
 .container {
     max-width: 1100px;
     margin: 3rem auto;
     padding: 0 1.5rem;
 }
 
-/* =========================
-   Card
-========================= */
 .card {
     background: white;
     border-radius: var(--radius);
@@ -91,18 +65,13 @@ img {
     box-shadow: var(--shadow);
 }
 
-/* =========================
-   Buttons
-========================= */
+/* BUTTONS */
 .btn {
     border: none;
     border-radius: 12px;
     padding: 12px 16px;
     font-weight: 600;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .btn-primary {
@@ -116,8 +85,7 @@ img {
 }
 
 .btn-ghost {
-    background: rgba(31, 41, 51, 0.08);
-    color: var(--anthracite);
+    background: rgba(0, 0, 0, 0.08);
 }
 
 .btn:disabled {
@@ -125,9 +93,7 @@ img {
     cursor: not-allowed;
 }
 
-/* =========================
-   Scan UI
-========================= */
+/* SCAN */
 .scan-actions {
     display: flex;
     gap: 12px;
@@ -136,13 +102,13 @@ img {
 }
 
 .scan-status {
-    margin-top: 1.2rem;
+    margin-top: 1rem;
 }
 
 .progress {
     height: 10px;
+    background: rgba(0, 0, 0, 0.1);
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
 
@@ -156,20 +122,12 @@ img {
     margin-top: 1.5rem;
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: var(--shadow);
 }
 
-.scan-results {
-    margin-top: 1.5rem;
-}
-
-/* =========================
-   Items preview
-========================= */
 .items-preview {
     list-style: none;
     padding: 0;
-    margin: 1rem 0 0;
+    margin: 1rem 0;
     display: grid;
     gap: 10px;
 }
@@ -181,7 +139,6 @@ img {
     box-shadow: var(--shadow);
     display: flex;
     justify-content: space-between;
-    align-items: center;
 }
 
 .items-preview .price {
@@ -189,43 +146,45 @@ img {
     color: var(--blue);
 }
 
-/* =========================
-   Raw OCR
-========================= */
-.raw-ocr {
-    margin-top: 1rem;
+/* MESSAGES */
+.import-message {
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 1rem;
+    font-weight: 600;
 }
 
+.import-message.success {
+    background: rgba(31, 182, 170, 0.15);
+    color: #0f766e;
+}
+
+.import-message.error {
+    background: rgba(220, 38, 38, 0.15);
+    color: #991b1b;
+}
+
+/* OCR DEBUG */
 .raw-ocr pre {
     background: #0b1220;
     color: #d1e7ff;
     padding: 12px;
     border-radius: 12px;
     white-space: pre-wrap;
-    overflow-x: auto;
 }
 
-/* =========================
-   Footer
-========================= */
+/* FOOTER */
 .footer {
     text-align: center;
+    padding: 2rem;
     font-size: 0.85rem;
     color: var(--muted);
-    padding: 2rem 1rem;
 }
 
-/* =========================
-   Utilities
-========================= */
+/* UTIL */
 .visually-hidden {
     position: absolute;
     width: 1px;
     height: 1px;
-    padding: 0;
-    margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
 }
