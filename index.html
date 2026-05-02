@@ -3,38 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Pantry</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#1e6fd9" />
+
+  <!-- iOS icon -->
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/main.css" />
-
-  <!-- Fonts (clean & modern) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link 
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" 
-    rel="stylesheet"
-  >
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e6fd9">
-  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon-180.png">
 </head>
 
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
-</script>
-
 <body>
+
+  <!-- Header -->
   <header class="app-header">
     <div class="header-content">
-      <img
-        src="assets/images/logo.png"
-        alt="Pantry logo"
-        class="logo"
-      />
+      <img src="assets/images/logo.png" class="logo" alt="Pantry logo" />
       <div>
         <h1>Pantry</h1>
         <p class="tagline">Slim overzicht van wat je in huis hebt</p>
@@ -42,80 +35,82 @@
     </div>
   </header>
 
+  <!-- Main -->
   <main class="container">
+
+    <!-- Scan card -->
     <section class="card">
-      <h2>Welkom 👋</h2>
-      <p>
-        Pantry helpt je om overzicht te houden over je voorraad:
-        voedsel, huishoudproducten en alles wat je niet wil vergeten.
+      <h2>Kasticket scannen</h2>
+      <p class="muted">
+        Neem een foto van je kasticket. Pantry leest het ticket en maakt automatisch items aan.
       </p>
-    </section>
 
-    <section class="card">
-  <h2>Kasticket scannen</h2>
-  <p class="muted">
-    Neem een foto van je kasticket. Pantry leest het uit en maakt items aan in je lokale opslag.
-  </p>
+      <div class="scan-actions">
+        <!-- ✅ BELANGRIJK: LABEL → input (iOS PWA FIX) -->
+        <label for="ticketInput" class="btn btn-primary">
+          📸 Foto nemen
+        </label>
 
-  <div class="scan-actions">
-    <button class="btn btn-primary" id="btnScan">📸 Foto nemen</button>
-    <button class="btn btn-ghost" id="btnClearScan" disabled>Wis scan</button>
+        <button id="btnClearScan" class="btn btn-ghost" disabled>
+          🗑 Wis scan
+        </button>
 
-    <input
-      id="ticketInput"
-      type="file"
-      accept="image/*"
-      capture="environment"
-      hidden
-    />
-  </div>
-
-  <div class="scan-status" id="scanStatus" hidden>
-    <div class="progress">
-      <div class="progress-bar" id="progressBar" style="width:0%"></div>
-    </div>
-    <div class="muted" id="progressText">OCR wordt voorbereid…</div>
-  </div>
-
-  <div class="scan-preview" id="scanPreview" hidden>
-    <img id="ticketPreviewImg" alt="Kasticket preview" />
-  </div>
-
-  <div class="scan-results" id="scanResults" hidden>
-    <h3>Gevonden items</h3>
-    <ul id="itemsPreviewList" class="items-preview"></ul>
-
-    <div class="scan-actions">
-      <button class="btn btn-teal" id="btnImport" disabled>✅ Importeer naar Pantry</button>
-    </div>
-
-    <details class="raw-ocr">
-      <summary>Toon ruwe OCR tekst (debug)</summary>
-      <pre id="rawOcrText"></pre>
-    </details>
-  </div>
-  </section>
-
-<script type="module" src="js/app.js"></script>
-
-    <section class="features">
-      <div class="feature">
-        <h3>📦 Overzicht</h3>
-        <p>Alles wat je in huis hebt, helder gegroepeerd.</p>
+        <input
+          id="ticketInput"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          class="visually-hidden"
+        />
       </div>
-      <div class="feature">
-        <h3>⏰ Nooit te laat</h3>
-        <p>Zie wat bijna op is of vervalt.</p>
+
+      <!-- OCR status -->
+      <div id="scanStatus" class="scan-status" hidden>
+        <div class="progress">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div id="progressText" class="muted">OCR wordt voorbereid…</div>
       </div>
-      <div class="feature">
-        <h3>📱 Klaar voor mobiel</h3>
-        <p>Perfect bruikbaar op je telefoon.</p>
+
+      <!-- Image preview -->
+      <div id="scanPreview" class="scan-preview" hidden>
+        <img id="ticketPreviewImg" alt="Kasticket preview" />
+      </div>
+
+      <!-- Results -->
+      <div id="scanResults" class="scan-results" hidden>
+        <h3>Gevonden items</h3>
+        <ul id="itemsPreviewList" class="items-preview"></ul>
+
+        <div class="scan-actions">
+          <button id="btnImport" class="btn btn-teal" disabled>
+            ✅ Importeren in Pantry
+          </button>
+        </div>
+
+        <details class="raw-ocr">
+          <summary>Toon ruwe OCR tekst (debug)</summary>
+          <pre id="rawOcrText"></pre>
+        </details>
       </div>
     </section>
+
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    <p>© 2026 Pantry · Built with ❤️</p>
+    © 2026 Pantry
   </footer>
+
+  <!-- App logic -->
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
+
 </body>
 </html>
