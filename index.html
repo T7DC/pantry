@@ -51,6 +51,53 @@
       </p>
     </section>
 
+    <section class="card">
+  <h2>Kasticket scannen</h2>
+  <p class="muted">
+    Neem een foto van je kasticket. Pantry leest het uit en maakt items aan in je lokale opslag.
+  </p>
+
+  <div class="scan-actions">
+    <button class="btn btn-primary" id="btnScan">📸 Foto nemen</button>
+    <button class="btn btn-ghost" id="btnClearScan" disabled>Wis scan</button>
+
+    <input
+      id="ticketInput"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      hidden
+    />
+  </div>
+
+  <div class="scan-status" id="scanStatus" hidden>
+    <div class="progress">
+      <div class="progress-bar" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="muted" id="progressText">OCR wordt voorbereid…</div>
+  </div>
+
+  <div class="scan-preview" id="scanPreview" hidden>
+    <img id="ticketPreviewImg" alt="Kasticket preview" />
+  </div>
+
+  <div class="scan-results" id="scanResults" hidden>
+    <h3>Gevonden items</h3>
+    <ul id="itemsPreviewList" class="items-preview"></ul>
+
+    <div class="scan-actions">
+      <button class="btn btn-teal" id="btnImport" disabled>✅ Importeer naar Pantry</button>
+    </div>
+
+    <details class="raw-ocr">
+      <summary>Toon ruwe OCR tekst (debug)</summary>
+      <pre id="rawOcrText"></pre>
+    </details>
+  </div>
+  </section>
+
+<script type="module" src="js/app.js"></script>
+
     <section class="features">
       <div class="feature">
         <h3>📦 Overzicht</h3>
