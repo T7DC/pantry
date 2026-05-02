@@ -43,14 +43,31 @@ export function getItemById(id) {
 }
 
 export function addItem(data) {
+    if (!data) {
+        throw new Error("Geen itemdata ontvangen");
+    }
+
+    if (!data.name || data.name.trim().length === 0) {
+        throw new Error("Item heeft geen naam");
+    }
+
+    const quantity = Number(data.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+        throw new Error(`Ongeldige hoeveelheid voor "${data.name}"`);
+    }
+
+    if (!data.unit || data.unit.trim().length === 0) {
+        throw new Error(`Geen eenheid voor "${data.name}"`);
+    }
+
     const items = loadItems();
 
     const item = {
         id: generateId(),
-        name: data.name,
-        quantity: Number(data.quantity),
+        name: data.name.trim(),
+        quantity,
         unit: data.unit,
-        price: data.price ?? null,
+        price: Number.isFinite(Number(data.price)) ? Number(data.price) : null,
         purchaseDate: data.purchaseDate ?? null,
         expiryDate: data.expiryDate ?? null,
         category: data.category ?? null,

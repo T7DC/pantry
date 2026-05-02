@@ -110,3 +110,18 @@ btnImport.addEventListener("click", () => {
         showMessage("error", "❌ Items konden niet worden opgeslagen.");
     }
 });
+
+let successCount = 0;
+let errorCount = 0;
+const errors = [];
+
+for (const it of parsedItems) {
+    try {
+        addItem(it);
+        successCount++;
+    } catch (err) {
+        errorCount++;
+        errors.push(err.message);
+    }
+}
+``
